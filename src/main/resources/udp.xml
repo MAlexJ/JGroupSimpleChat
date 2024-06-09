@@ -7,7 +7,7 @@
         xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups.xsd"
 >
     <UDP
-            bind_addr="match-address:192.168.\*"
+            bind_addr="match-address:192.168.\*,SITE_LOCAL"
             mcast_port="${jgroups.udp.mcast_port:45588}"
             thread_pool.min_threads="0"
             thread_pool.max_threads="200"
