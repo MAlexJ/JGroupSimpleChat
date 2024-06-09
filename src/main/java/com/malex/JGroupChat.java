@@ -20,18 +20,18 @@ public class JGroupChat {
 
   public static void main(String[] args) throws Exception {
     var channel = init();
-    //    handle(channel);
     processInput(channel);
     channel.close();
   }
 
   private static JChannel init() throws Exception {
-    //  implements Closeable
-    JChannel channel = new JChannel("src/main/resources/udp.xml");
     // 1.
-    channel.setName(CHANEL_NAME + "_" + UUID.randomUUID());
+    JChannel channel = new JChannel("src/main/resources/tcp.xml");
 
     // 2.
+    channel.setName(CHANEL_NAME + "_" + UUID.randomUUID());
+
+    // 3.
     channel.connect("CLUSTER_NAME");
 
     // 4.
@@ -41,7 +41,7 @@ public class JGroupChat {
   }
 
   /** Loop on console input until we see 'x' to exit */
-  private static void processInput(JChannel channel) throws Exception {
+  private static void processInput(JChannel channel) {
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
     while (running) {
       try {
