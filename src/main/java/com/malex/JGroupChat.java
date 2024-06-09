@@ -14,7 +14,8 @@ import org.jgroups.ObjectMessage;
 @Log
 public class JGroupChat {
 
-  private static final String CHANEL_NAME = "J_GROUP_CHAT";
+  private static final String LOGICAL_CHANEL_NAME = "J_GROUP_CHAT";
+  private static final String CLUSTER_NAME = "J_CLUSTER_NAME";
 
   private static boolean running = true;
 
@@ -25,16 +26,16 @@ public class JGroupChat {
   }
 
   private static JChannel init() throws Exception {
-    // 1.
-    JChannel channel = new JChannel("src/main/resources/tcp.xml");
+    // 1. set up XML transport configuration
+    var channel = new JChannel("src/main/resources/udp.xml");
 
-    // 2.
-    channel.setName(CHANEL_NAME + "_" + UUID.randomUUID());
+    // 2. config logical name for the channel.
+    channel.setName(LOGICAL_CHANEL_NAME + "_" + UUID.randomUUID());
 
-    // 3.
-    channel.connect("CLUSTER_NAME");
+    // 3. set up cluster name
+    channel.connect(CLUSTER_NAME);
 
-    // 4.
+    // 4. receiver
     channel.setReceiver(new ReceiverImpl());
 
     return channel;
@@ -45,7 +46,6 @@ public class JGroupChat {
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
     while (running) {
       try {
-
         // Get a destination, <enter> means broadcast
         Address destination = null;
         System.out.print("Enter a destination: ");
@@ -62,7 +62,7 @@ public class JGroupChat {
           System.out.println("current: " + currentAddress);
           getAddress(channel).stream()
               .filter(address -> !address.equals(currentAddress))
-              .forEach(System.out::println);
+              .forEach(address -> System.out.println("local: " + address));
           continue;
         }
 

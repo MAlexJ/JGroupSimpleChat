@@ -14,5 +14,14 @@ JGroups is a Java API for reliable messages exchange. It features a simple inter
 
 #### Transport protocols
 
-JGroups info: http://jgroups.org/manual4/index.html#_transport_protocols
-Link to UDP configuration file: https://raw.githubusercontent.com/belaban/JGroups/master/conf/udp.xml
+JGroups v.5 TRANSPORT info: http://www.jgroups.org/manual5/index.html#Transport
+
+for UDP:
+
+The following special values are also recognized for bind_addr:
+
+```
+ bind_addr="match-address:192.168.\*,SITE_LOCAL"
+```
+
+Link to simple UDP configuration file: https://raw.githubusercontent.com/belaban/JGroups/master/conf/udp.xml
