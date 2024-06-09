@@ -19,7 +19,6 @@ public class ReceiverImpl implements Receiver {
 
   @Override
   public void viewAccepted(View newView) {
-
     // Save view if this is the first
     if (lastView == null) {
       System.out.println("Received initial view:");

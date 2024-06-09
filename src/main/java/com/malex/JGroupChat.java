@@ -4,13 +4,12 @@ import com.malex.receiver.ReceiverImpl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 import lombok.extern.java.Log;
 import org.jgroups.Address;
 import org.jgroups.JChannel;
 import org.jgroups.ObjectMessage;
-import org.jgroups.View;
 
 @Log
 public class JGroupChat {
@@ -18,8 +17,6 @@ public class JGroupChat {
   private static final String CHANEL_NAME = "J_GROUP_CHAT";
 
   private static boolean running = true;
-
-  private static Address address;
 
   public static void main(String[] args) throws Exception {
     var channel = init();
@@ -40,32 +37,7 @@ public class JGroupChat {
     // 4.
     channel.setReceiver(new ReceiverImpl());
 
-    //    // 5. Start state transfer
-    //    channel.getState(null, 0);
-
-    address = channel.getAddress();
-
     return channel;
-  }
-
-  private static void handle(JChannel channel) {
-    BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    while (true) {
-      try {
-        System.out.print("> ");
-        System.out.flush();
-        String line = in.readLine().toLowerCase();
-        if (line.startsWith("quit") || line.startsWith("exit")) {
-          break;
-        }
-        line = " max: " + line;
-        ObjectMessage objectMessage = new ObjectMessage();
-        objectMessage.setObject(line);
-        channel.send(objectMessage);
-      } catch (Exception ignored) {
-        // ignore
-      }
-    }
   }
 
   /** Loop on console input until we see 'x' to exit */
@@ -83,8 +55,23 @@ public class JGroupChat {
         if (destinationName.equals("x")) {
           running = false;
           continue;
-        } else if (!destinationName.isEmpty()) {
-          destination = getAddress(destinationName, channel).orElse(address);
+        }
+
+        if (destinationName.equals("r")) {
+          Address currentAddress = channel.getAddress();
+          System.out.println("current: " + currentAddress);
+          getAddress(channel).stream()
+              .filter(address -> !address.equals(currentAddress))
+              .forEach(System.out::println);
+          continue;
+        }
+
+        if (!destinationName.isEmpty()) {
+          destination = getAddress(destinationName, channel);
+          if (destination == null) {
+            System.out.print("Destination '" + destinationName + "' not found!");
+            continue;
+          }
         }
 
         // Accept a string to send
@@ -112,17 +99,17 @@ public class JGroupChat {
       channel.send(message);
     } catch (Exception exception) {
       System.err.println("Exception sending message: " + exception.getMessage());
-      running = false;
     }
   }
 
-  private static Optional<Address> getAddress(String name, JChannel channel) {
-    View view = channel.view();
-    if (view == null) {
-      return Optional.of(address);
-    }
-    return view.getMembers().stream()
-        .filter(address -> name.equals(address.toString()))
-        .findFirst();
+  private static Address getAddress(String name, JChannel channel) {
+    return getAddress(channel).stream()
+        .filter(address -> name.equalsIgnoreCase(address.toString()))
+        .findFirst()
+        .orElse(null);
+  }
+
+  private static List<Address> getAddress(JChannel channel) {
+    return channel.view().getMembers();
   }
 }
